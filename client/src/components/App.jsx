@@ -7,7 +7,7 @@ import DateTagApp from './datetag/DateTagApp.jsx';
 import AlbumPicture from './albumpicture/AlbumPictureApp.jsx';
 import WaveFormApp from './waveform/WaveFormApp.jsx';
 import CommentsApp from './comments/CommentsApp.jsx';
-import mp3 from '../../dist/4e6f865c81aa54f9e778e35e7ac3ed73.mp3';
+// import mp3 from '../../dist/4e6f865c81aa54f9e778e35e7ac3ed73.mp3';
 
 class App extends React.Component {
   constructor(props) {
@@ -17,7 +17,8 @@ class App extends React.Component {
       song: [],
       isPaused: true,
       currTime: 0,
-      waveformData: []
+      waveformData: [],
+      sound: null,
     }
 
     this.handlePlayPause = this.handlePlayPause.bind(this);
@@ -26,12 +27,11 @@ class App extends React.Component {
     this.setWaveformData = this.setWaveformData.bind(this);
     this.changeToMinutes = this.changeToMinutes.bind(this);
     this.handleClickTimeUpdate = this.handleClickTimeUpdate.bind(this);
-    this.sound = new Audio(mp3);
   }
 
   handleClickTimeUpdate(index) {
-    let newTime = (index / 250 * this.sound.duration);
-    this.sound.currentTime = newTime;
+    let newTime = (index / 250 * this.state.sound.duration);
+    this.state.sound.currentTime = newTime;
     this.setState({
       currTime: newTime
     });
@@ -39,9 +39,9 @@ class App extends React.Component {
 
   //setstate of current time
   onTimeUpdate() {
-    this.sound.ontimeupdate = () => {
+    this.state.sound.ontimeupdate = () => {
       this.setState({
-        currTime: this.sound.currentTime
+        currTime: this.state.sound.currentTime
       });
     }
   }
@@ -69,6 +69,9 @@ class App extends React.Component {
       .then(songs => {
         this.setState({
           song: songs
+        });
+        this.setState({
+          sound: new Audio(this.state.song[0].songURL)
         });
       })
       .catch(error => {
@@ -100,45 +103,48 @@ class App extends React.Component {
 
   render() {
 
+    this.state.sound === null ? console.log('what') : !this.state.isPaused ? this.state.sound.play() : this.state.sound.pause();
     //play/pause music
-    if (!this.state.isPaused) {
-      this.sound.play();
-    } else {
-      this.sound.pause();
-    }
+    // if (!this.state.isPaused) {
+    //   this.sound.play();
+    // } else {
+    //   this.sound.pause();
+    // }
 
     return (
-      <MainPlayerWrapper >
-
-        <PlayPauseSongHeader>
-          <PlayButtonApp isPaused={this.state.isPaused} handlePlayPause={this.handlePlayPause} />
-          {!this.state.song.length ? <div /> : <SongArtistApp song={this.state.song[0]} />}
-        </PlayPauseSongHeader>
-
-        <DateTag>
-          {!this.state.song.length ? <div /> : <DateTagApp song={this.state.song[0]} />}
-        </DateTag>
-
-        <Album>
-          {!this.state.song.length ? <div /> : <AlbumPicture song={this.state.song[0]} />}
-        </Album>
-
-        <WaveFormComments>
-
-          <TimeStampContainer>
-            <CurrentTimeStamp>{this.changeToMinutes(this.state.currTime)}</CurrentTimeStamp>
-            {!this.state.song.length ? <div /> : <DurationTimeStamp>{this.changeToMinutes(this.sound.duration)}</DurationTimeStamp>}
-          </TimeStampContainer>
-
-          <CommentsContainer>
-            {!this.state.song.length ? <div /> : <CommentsApp currTime={this.state.currTime} duration={this.sound.duration} comments={this.state.song[0].comments}/>}
-          </CommentsContainer>
-
-          {!this.state.song.length ? <div /> : <WaveFormApp isPaused={this.state.isPaused} wfdata={this.state.waveformData} handleClickTimeUpdate={this.handleClickTimeUpdate} currTime={this.state.currTime} duration={this.sound.duration} />}
-            
-        </WaveFormComments>
-
-      </MainPlayerWrapper>
+      <div>
+        {this.state.sound && <MainPlayerWrapper >
+  
+          <PlayPauseSongHeader>
+            <PlayButtonApp isPaused={this.state.isPaused} handlePlayPause={this.handlePlayPause} />
+            {!this.state.sound ? <div /> : <SongArtistApp song={this.state.song[0]} />}
+          </PlayPauseSongHeader>
+  
+          <DateTag>
+            {!this.state.sound ? <div /> : <DateTagApp song={this.state.song[0]} />}
+          </DateTag>
+  
+          <Album>
+            {!this.state.sound ? <div /> : <AlbumPicture song={this.state.song[0]} />}
+          </Album>
+  
+          <WaveFormComments>
+  
+            <TimeStampContainer>
+              <CurrentTimeStamp>{this.changeToMinutes(this.state.currTime)}</CurrentTimeStamp>
+              {this.state.sound && <DurationTimeStamp>{this.changeToMinutes(this.state.sound.duration)}</DurationTimeStamp>}
+            </TimeStampContainer>
+  
+            <CommentsContainer>
+              {!this.state.sound ? <div /> : <CommentsApp currTime={this.state.currTime} duration={this.state.sound.duration} comments={this.state.song[0].comments}/>}
+            </CommentsContainer>
+  
+            {!this.state.sound ? <div /> : <WaveFormApp isPaused={this.state.isPaused} wfdata={this.state.waveformData} handleClickTimeUpdate={this.handleClickTimeUpdate} currTime={this.state.currTime} duration={this.state.sound.duration} />}
+              
+          </WaveFormComments>
+  
+        </MainPlayerWrapper>}
+      </div>
     );
   }
 
