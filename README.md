@@ -29,7 +29,6 @@ A clone of soundcloud's user interface as practice on front-end engineering. As 
 
 ### Built With
 
-This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
 * [React](https://reactjs.org/)
 * [Express](https://expressjs.com/)
 * [Node](https://nodejs.org/en/)
